@@ -1,0 +1,27 @@
+server {
+	listen 443 ssl;
+	listen [::]:443 ssl;
+
+	ssl on;
+	ssl_certificate /etc/ssl/certs/inception.crt;
+	ssl_certificate_key /etc/ssl/private/inception.key;
+
+	ssl_protocols TLSv1.2 TLSv1.3;
+	ssl_prefer_server_ciphers on;
+
+	server_name DOMAIN;
+
+	root /var/www/wordpress;
+	index index.html index.php;
+
+	access_log /dev/stdout;
+	error_log /dev/stderr;
+
+	location ~ \.php$ {
+		fastcgi_pass wordpress:9000;
+		include fastcgi_params;
+		include snippets/fastcgi-php.conf;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		fastcgi_param PATH_INFO $fastcgi_path_info;
+	}
+}

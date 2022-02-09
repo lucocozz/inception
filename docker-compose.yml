@@ -1,0 +1,71 @@
+version: "3.5"
+services:
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    build: ./sources/nginx/
+    restart: on-failure
+    tty: true
+    stdin_open: true
+    env_file:
+      - sources/.env
+    volumes:
+      - wordpress:/var/www/
+    ports:
+      - "443:443"
+    networks:
+      - default
+
+  wordpress:
+    image: wordpress
+    container_name: wordpress
+    build: ./sources/wordpress/
+    restart: on-failure
+    tty: true
+    stdin_open: true
+    env_file:
+      - sources/.env
+    volumes:
+      - wordpress:/var/www/
+    ports:
+      - "9000:9000"
+    networks:
+      - default
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    build: ./sources/mariadb/
+    restart: always
+    tty: true
+    stdin_open: true
+    env_file:
+      - sources/.env
+    volumes:
+      - mariadb:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - default
+
+volumes:
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/${USER}/data/wordpress/
+      o: bind
+
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/${USER}/data/mariadb/
+      o: bind
+
+networks:
+  default:
+    driver: bridge
